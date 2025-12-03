@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from twilio.rest import client
 
 #Chennai
 LAT = 13.0827
@@ -18,19 +19,26 @@ Weather_params = {
 }
 
 
-# def will_it_rain_during_work_hours(start_hour=8,end_hour=18):
+def will_it_rain_during_work_hours(start_hour=8,end_hour=18):
 
-
-#     response = requests.get(OPEN_METEO_Endpoint,Weather_params)
-#     response.raise_for_status()
-#     data = response.json()
+    response = requests.get(OPEN_METEO_Endpoint,Weather_params)
+    response.raise_for_status()
+    data = response.json()
     
+    times = data["hourly"]["time"]
+    precipitation = data["hourly"]["precipitation"]
 
+    today = datetime.now().date()
 
-response = requests.get(OPEN_METEO_Endpoint,Weather_params)
-response.raise_for_status()
-data = response.json()
+    is_rain = False
 
-print(data)
+    for time_str, rain_mm in zip(times, precipitation):
+        dt = datetime.fromisoformat(time_str)
 
+        #check only between 8am to 6pm
+        if dt.date() == today and start_hour <= dt.hour < end_hour:
+            if rain_mm > 0:
 
+                is_rain = True
+
+            
